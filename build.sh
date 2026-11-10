@@ -48,7 +48,7 @@ aapt package -f $DBG \
     --min-sdk-version 19 --target-sdk-version 34 \
     -F "$T/base.apk"
 
-# 2. Java. -encoding обязателен: в комментариях русский, а в C-локали
+# 2. Java.  -encoding обязателен: в комментариях русский, а в C-локали
 #    javac по умолчанию читает ASCII и валится.
 javac -encoding UTF-8 -source 8 -target 8 -Xlint:-options \
     -cp "$AJAR" -d "$T/classes" \
