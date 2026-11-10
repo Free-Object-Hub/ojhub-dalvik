@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="xyz.objecthub.android"
+    android:versionCode="1"
+    android:versionName="0.1-skeleton">
+
+    <uses-sdk
+        android:minSdkVersion="19"
+        android:targetSdkVersion="34" />
+
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <!--
+      allowBackup=false: в Prefs лежит user-token.
+      configChanges не ставим. Поворот и смерть Activity
+      обязаны идти через тот же createRoot, что и смена джейла.
+      label литералом: без res/ нет и strings.xml.
+    -->
+    <application
+        android:name=".App"
+        android:allowBackup="false"
+        android:icon="@drawable/ic_launcher"
+        android:label="OjHub Dalvik"
+        android:theme="@android:style/Theme.DeviceDefault">
+
+        <!--
+          singleTask: состояние джейлов глобальное (статика), экземпляр
+          Activity должен быть один. Иначе второй (ссылка, share) перепривяжет
+          контексты, а первый останется зомби с мёртвым деревом.
+        -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>
