@@ -31,7 +31,7 @@ export PATH
 
 HERE=$(cd "$(dirname "$0")" && pwd)
 T=${T:-/tmp/ojhub-build}
-APK=ojhub-dalvik.apk
+APK=ojhub-dalvik-$(date +%Y-%m-%d_%H-%M-%S).apk
 
 [ -f "$AJAR" ] || { echo "нет android.jar: $AJAR (задай AJAR= или PLAT=)" >&2; exit 1; }
 

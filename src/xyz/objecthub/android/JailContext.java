@@ -174,26 +174,18 @@ public final class JailContext {
 		if (bar != null) bar.setSubtitle(null);
 	}
 
-	/**
-	 * Пустой маршрут, пока нет pageMain. set('') снимает _i,
-	 * как это делает страница в GHE после отрисовки.
-	 * JITlink из nhConfig.js повесим, когда поедут сами страницы.
-	 */
-	// стоп нахуя вообще андроид приложению роутер?
-	// БЛЯЯЯ это и есть буквально link.actions
-	// КАКОГО ХУЯ МНЕ НИКТО ЭТО НЕ СКАЗАЛ БЛЯТЬ
+	// это аналог link.actions из newHelper link
 	private static void bind(final JailContext J) {
-		// э а где if renderBeta => defTitle = 'OJHUB BUILD' + date
 		J.link.defTitle = "Object Hub";
 		J.link.basePage = new Runnable() {
 			@Override
 			public void run() {
 				J.link.set("");
 				J.clearMain();
+				PageMain.pageMain(J.id);
 			}
 		};
 
-		// это моя главная страница бля
 		J.link.actions.put("", new VirtualLink.Call() {
 			@Override
 			public void call(Object value) {
@@ -208,7 +200,7 @@ public final class JailContext {
 			}
 		});
 
-		// ещё грок не позаботился о моей навигации в виме, мне неудобно прыгать на { и }
+		//
 	}
 
 	private void clearMain() {

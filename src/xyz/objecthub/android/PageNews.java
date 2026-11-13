@@ -1,113 +1,125 @@
 package xyz.objecthub.android;
 
-import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
-import android.widget.ListView;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 
-/**
- * Читалка новостей. Как globalNews в GHE: просто функция.
- * Запрос, разбор, отрисовка. Ни кеша, ни глобалов, ни полей джейла.
- */
 public final class PageNews {
-    private PageNews() {}
+	private PageNews() {}
 
-    // ЗАПОЛНИ по ojhub.js: имя эндпоинта и индексы полей новости.
-    // sData[11] — база news. Не угадывай, сверяй с RenderNews.
-	// MIODOMB: клайд... ты слишком оптимистичный, скажи это /content/newsAll.php
-    private static final String ENDPOINT = "newsAll";
-    private static final int F_TITLE = 1;
-    private static final int F_TEXT = 2;
+	public static void pageNews(final int jId) {
+		JailContext J = JailRuntime.live(jId);
+		if (J == null) return;
+		J.link.set("news");
+		J.helperMain.removeAllViews();
 
-    public static void pageNews(final int jId) {
-        JailContext J0 = JailRuntime.live(jId);
-        if (J0 == null) return;
+		ScrollView sv = new ScrollView(J.context);
 
-        J0.link.set("news");          // страница сама пушит адрес, как в GHE
-        text(J0, AppState.sData[0] + ENDPOINT + AppState.php);
+		LinearLayout col = new LinearLayout(J.context);
+		col.setOrientation(LinearLayout.VERTICAL);
 
-        Http.cached(AppState.sData[0] + ENDPOINT + AppState.php, new Http.Done() {
-            @Override
-            public void done(String data) {
-                JailContext J = JailRuntime.live(jId);   // нет джейла или root снят: рисовать некуда
-                if (J == null) return;
-                // пока шёл запрос, могли уйти на другую страницу: не затираем её
-                if (!J.link.search().startsWith("?news")) return;
+		sv.addView(col, new ViewGroup.LayoutParams(
+				ViewGroup.LayoutParams.MATCH_PARENT,
+				ViewGroup.LayoutParams.WRAP_CONTENT));
 
-                if (data == null) { text(J, "network"); return; }          // аналог .catch
-                if (!data.startsWith("[")) { text(J, "proto: " + data); return; }  // числовой код строкой
-                try {
-					// клайд ещё не сделал рендер похоже
-                    mount(J, new JSONArray(data));
-                } catch (JSONException e) {
-                    text(J, "json: " + e.getMessage());
-                }
-            }
-        });
-    }
+		J.helperMain.addView(sv, new FrameLayout.LayoutParams(
+				ViewGroup.LayoutParams.MATCH_PARENT,
+				ViewGroup.LayoutParams.MATCH_PARENT));
+		more(jId, col, 0);
+	}
 
-    private static void mount(JailContext J, JSONArray data) {
-        J.helperMain.removeAllViews();
-        ListView list = new ListView(J.context);
-        list.setAdapter(new Adapter(J.context, data));
-        J.helperMain.addView(list, new FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-    }
+	private static void more(final int jId, final LinearLayout col, final int page) {
+		Http.cached(AppState.sData[0] + "newsAll" + AppState.php + "?page=" + page, new Http.Done() {
+			@Override
+			public void done(String data) {
+				JailContext J = JailRuntime.live(jId);
+				if (J == null) return;
+				if (!J.link.search().startsWith("?news")) return;
 
-    private static void text(JailContext J, String s) {
-        J.helperMain.removeAllViews();
-        TextView t = new TextView(J.context);
-        t.setText(s);
-        J.helperMain.addView(t);
-    }
+				if (data == null) {
+					TextView t = new TextView(J.context);
+					t.setText("network");
+					col.addView(t);
+					return;
+				}
 
-    /** ListView + convertView + Holder: View только для видимых строк. */
-    private static final class Adapter extends BaseAdapter {
-        private final Context cx;
-        private final JSONArray data;
+				if (!data.startsWith("[")) {
+					TextView t = new TextView(J.context);
+					t.setText("proto: " + data);
+					col.addView(t);
+					return;
+				}
 
-        Adapter(Context cx, JSONArray data) {
-            this.cx = cx;
-            this.data = data;
-        }
+				try {
+					JSONArray a = new JSONArray(data);
 
-        @Override public int getCount() { return data.length(); }
-        @Override public Object getItem(int i) { return data.optJSONArray(i); }
-        @Override public long getItemId(int i) { return i; }
+					int n = a.length();
+					if (n > 10) n = 10;
 
-        @Override
-        public View getView(int pos, View v, ViewGroup parent) {
-            Holder h;
-            if (v == null) {
-                LinearLayout row = new LinearLayout(cx);
-                row.setOrientation(LinearLayout.VERTICAL);
-                row.setPadding(24, 16, 24, 16);
-                h = new Holder();
-                h.title = new TextView(cx);
-                h.title.setTextSize(18);
-                h.text = new TextView(cx);
-                row.addView(h.title);
-                row.addView(h.text);
-                row.setTag(h);
-                v = row;
-            } else {
-                h = (Holder) v.getTag();
-            }
-            JSONArray n = data.optJSONArray(pos);
-            h.title.setText(n == null ? "" : n.optString(F_TITLE, ""));
-            h.text.setText(n == null ? "" : n.optString(F_TEXT, ""));
-            return v;
-        }
-    }
+					// Одна итерация цикла = одна новость на экране.
+					for (int i = 0; i < n; i++) {
+						JSONArray item = a.optJSONArray(i);
 
-    private static final class Holder {
-        TextView title, text;
-    }
+						// Строка новости: вертикальный контейнер
+						// с двумя текстами внутри.
+						LinearLayout row = new LinearLayout(J.context);
+						row.setOrientation(LinearLayout.VERTICAL);
+
+						// Отступы в пикселях (слева, сверху, справа, снизу).
+						// На экранах с разной плотностью пиксели разные,
+						// это мы поправим позже через dp.
+						// самое время объяснить мне как работает dp!
+						row.setPadding(24, 16, 24, 16);
+
+						TextView title = new TextView(J.context);
+						title.setTextSize(18);
+						// optString(индекс, "") = взять строку или "" если нет.
+						title.setText(item == null ? "" : item.optString(1, ""));
+
+						TextView text = new TextView(J.context);
+						text.setText(item == null ? "" : item.optString(2, ""));
+
+						// Кладём тексты в строку, а строку - в список.
+						row.addView(title);
+						row.addView(text);
+						col.addView(row);
+					}
+
+					// Если пришло больше, чем рисуем, значит есть ещё страница:
+					// добавляем кнопку "показать больше" в самый конец.
+					if (a.length() > 10) {
+						// final - потому что используем b внутри onClick.
+						final Button b = new Button(J.context);
+						b.setText("показать больше");
+
+						// Что делать по нажатию.
+						// MIOBOMB: выглядит как замыкание, я не люблю замыкания
+						b.setOnClickListener(new View.OnClickListener() {
+							@Override
+							public void onClick(View v) {
+								// Сначала убираем саму кнопку, чтобы её
+								// нельзя было нажать дважды, пока грузится.
+								col.removeView(b);
+								// И просим следующую страницу.
+								more(jId, col, page + 1);
+							}
+						});
+
+						col.addView(b);
+					}
+				} catch (JSONException e) {
+					TextView t = new TextView(J.context);
+					t.setText("json: " + e.getMessage());
+					col.addView(t);
+				}
+			}
+		});
+	}
 }
