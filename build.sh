@@ -61,6 +61,14 @@ d8 --min-api 19 --lib "$AJAR" --output "$T/dex" \
 # 4. Добавить dex в apk (aapt add кладёт файл по относительному пути).
 ( cd "$T/dex" && aapt add "$T/base.apk" classes.dex >/dev/null )
 
+# 4b. assets -> тот же base.apk. Запускать из $HERE, чтобы путь внутри
+#     apk остался assets/certs/x.pem (aapt add кладёт файл по переданному пути).
+if [ -d "$HERE/assets" ]; then
+    ( cd "$HERE" && find assets -type f | while read -r f; do
+        aapt add "$T/base.apk" "$f" >/dev/null
+    done )
+fi
+
 # 5. Выравнивание и подпись.
 zipalign -f 4 "$T/base.apk" "$T/aligned.apk"
 

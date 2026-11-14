@@ -11,6 +11,8 @@ public class MainActivity extends Activity {
 	@Override
 	// это же вроде как аналог reStart, да?
 	protected void onCreate(Bundle savedInstanceState) {
+		// XXX: патч интернета для Android 4.4, смотреть в Tls.java
+		Tls.init(this);
 		// блять какого хуя тут пробелы вместо табов грок я тебя уебашу
 		super.onCreate(savedInstanceState);
 		setContentView(Shell.build(this));
