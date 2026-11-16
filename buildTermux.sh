@@ -57,6 +57,9 @@ aapt2 compile \
 DBG=""
 [ "$DEBUG" = 1 ] && DBG="--debug-mode"
 
+ASSETS=""
+[ -d "$HERE/assets" ] && ASSETS="-A $HERE/assets"
+
 aapt2 link \
     -o "$T/base.apk" \
     -I "$AJAR" \
@@ -64,6 +67,7 @@ aapt2 link \
     -R "$T/compiled/resources.zip" \
     --min-sdk-version 19 \
     --target-sdk-version 34 \
+    $ASSETS \
     $DBG
 
 # 2. Java compilation
