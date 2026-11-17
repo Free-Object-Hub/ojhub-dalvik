@@ -38,6 +38,8 @@ APK=ojhub-dalvik-$(date +%Y-%m-%d_%H-%M-%S).apk
 rm -rf "$T"
 mkdir -p "$T/classes" "$T/dex"
 
+sh "$HERE/tools/genBuildDate.sh" "$T/gen"
+
 # 1. Манифест -> каркас apk. res/ нет, R.java нет.
 DBG=""
 [ "$DEBUG" = 1 ] && DBG="--debug-mode"
@@ -52,7 +54,7 @@ aapt package -f $DBG \
 #    javac по умолчанию читает ASCII и валится.
 javac -encoding UTF-8 -source 8 -target 8 -Xlint:-options \
     -cp "$AJAR" -d "$T/classes" \
-    $(find "$HERE/src" -name '*.java')
+    $(find "$HERE/src" "$T/gen" -name '*.java')
 
 # 3. dex. Только наши классы; android.jar подключаем как lib.
 d8 --min-api 19 --lib "$AJAR" --output "$T/dex" \

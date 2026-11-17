@@ -176,7 +176,7 @@ public final class JailContext {
 
 	// это аналог link.actions из newHelper link
 	private static void bind(final JailContext J) {
-		J.link.defTitle = "Object Hub";
+		J.link.defTitle = "OjHub Dalvik";
 		J.link.basePage = new Runnable() {
 			@Override
 			public void run() {
@@ -197,6 +197,13 @@ public final class JailContext {
 			@Override
 			public void call(Object value) {
 				PageNews.pageNews(J.id);
+			}
+		});
+
+		J.link.actions.put("login", new VirtualLink.Call() {
+			@Override
+			public void call(Object value) {
+				PageLogin.pageLogin(J.id);
 			}
 		});
 

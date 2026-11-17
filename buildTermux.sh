@@ -47,6 +47,8 @@ done
 rm -rf "$T"
 mkdir -p "$T/classes" "$T/dex"
 
+sh "$HERE/tools/genBuildDate.sh" "$T/gen"
+
 mkdir -p "$T/compiled"
 
 aapt2 compile \
@@ -71,7 +73,7 @@ aapt2 link \
     $DBG
 
 # 2. Java compilation
-find "$HERE/src" -name '*.java' > "$T/sources.txt"
+find "$HERE/src" "$T/gen" -name '*.java' > "$T/sources.txt"
 
 "$JAVAC" \
     -encoding UTF-8 \

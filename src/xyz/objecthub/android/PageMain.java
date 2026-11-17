@@ -42,10 +42,23 @@ public final class PageMain {
 				dp(48), dp(48)));
 
 		TextView t = new TextView(J.context);
-		t.setText("U Bahnhof Ruhleben - Nervenklinik");
-		t.setTextSize(16);
+		t.setText("OjHub Dalvik: Ikarus Edition");
+		t.setTextSize(20);
 		t.setGravity(Gravity.CENTER);
 		col.addView(t);
+
+		TextView d = new TextView(J.context);
+		d.setText("Build: " + BuildInfo.DATE + " (" + BuildInfo.REV + ")");
+		d.setTextSize(12);
+		d.setGravity(Gravity.CENTER);
+		col.addView(d);
+
+		TextView hello = new TextView(J.context);
+		hello.setText("You are " + AppState.thisUser.optString("username", "").trim());
+		hello.setTextSize(16);
+		hello.setGravity(Gravity.CENTER);
+		hello.setPadding(0, 0, 0, dp(32));
+		col.addView(hello);
 
 		Button news = new Button(J.context);
 		news.setText("Открыть новости");
@@ -57,22 +70,15 @@ public final class PageMain {
 		});
 		col.addView(news);
 
-		Button hof = new Button(J.context);
-		hof.setText("SEGFAULT!");
-		hof.setOnClickListener(new View.OnClickListener() {
+		Button login = new Button(J.context);
+		login.setText("LOGIN ???");
+		login.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				JailContext J = JailRuntime.live(jId);
-				if (J == null) return;
-
-				TextView t = new TextView(J.context);
-				t.setText("spandau");
-				t.setTextSize(16);
-				t.setGravity(Gravity.CENTER);
-				col.addView(t);
+				PageLogin.pageLogin(jId);
 			}
 		});
-		col.addView(hof);
+		col.addView(login);
 
 		// debug info
 		TextView dbg = new TextView(J.context);
