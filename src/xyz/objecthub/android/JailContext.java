@@ -207,6 +207,13 @@ public final class JailContext {
 			}
 		});
 
+		J.link.actions.put("profile", new VirtualLink.Call() {
+			@Override
+			public void call(Object value) {
+				PageMyProfile.pageMyProfile(J.id);
+			}
+		});
+
 		//
 	}
 

@@ -75,7 +75,11 @@ public final class PageMain {
 		login.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				PageLogin.pageLogin(jId);
+				if (AppState.thisUser.optInt("ID") == 0) {
+					PageLogin.pageLogin(jId);
+				} else {
+					PageMyProfile.pageMyProfile(jId);
+				}
 			}
 		});
 		col.addView(login);
